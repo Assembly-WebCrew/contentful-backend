@@ -3,6 +3,8 @@ language: node_js
 node_js:
 - '8'
 cache: yarn
+addons:
+  ssh_known_hosts: moukari.assembly.org
 before_install:
 - openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
   -in secrets.tar.gz.enc -out secrets.tar.gz -d
