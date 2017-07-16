@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv-safe').load();
 const cfGraphql = require('cf-graphql');
 const express = require('express');
 const graphqlHTTP = require('express-graphql');
@@ -20,7 +21,7 @@ try {
     process.exit(1);
 }
 
-async function initializeContentful({spaceId, cdaToken, cmaToken, hostname, port}) {
+async function initializeContentful({spaceId, cdaToken, cmaToken, hostname, port, basePath}) {
     try {
         logger.info(`Fetching content types for space (${spaceId}) to create a space graph`);
         logger.trace(`Configuration: ${JSON.stringify({spaceId, cdaToken, cmaToken, hostname, port})}`);
@@ -38,18 +39,21 @@ async function initializeContentful({spaceId, cdaToken, cmaToken, hostname, port
         logger.info('Creating GraphQL schema');
         const schema = await cfGraphql.createSchema(spaceGraph);
 
-        startServer({hostname, port}, client, schema);
+        startServer({hostname, port, basePath}, client, schema);
     } catch (err) {
         logger.fatal(err.message);
         process.exit(1);
     }
 }
 
-function startServer({hostname, port}, client, schema) {
+function startServer({hostname, port, basePath}, client, schema) {
     logger.info(`Starting server at ${hostname}:${port}`);
     const app = express();
 
-    const ui = cfGraphql.helpers.graphiql({title: 'cf-graphql demo'});
+    const ui = cfGraphql.helpers.graphiql({
+      title: 'Assembly GraphQL Content',
+      url: `${basePath}graphql`
+    });
     app.get('/graphiql', (_, res) => res.set(ui.headers).status(ui.statusCode).end(ui.body));
 
     // TODO: Universal rendering

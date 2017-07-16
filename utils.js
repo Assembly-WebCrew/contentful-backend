@@ -11,6 +11,7 @@ module.exports = {
     getConfig: () => ({
         hostname: getEnvValue('CONTENTFUL_HOSTNAME', 'localhost'),
         port: getEnvValue('CONTENTFUL_PORT', 4000),
+        basePath: getEnvValue('BASE_PATH', '/'),
         spaceId: getEnvValue('CONTENTFUL_SPACE_ID', undefined, true),
         cdaToken: getEnvValue('CONTENTFUL_CONTENT_TOKEN', undefined, true),
         cmaToken: getEnvValue('CONTENTFUL_MANAGEMENT_TOKEN', undefined, true)
