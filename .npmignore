@@ -1,0 +1,11 @@
+# Directories
+deploy/
+.idea/
+
+# File types
+*.yml
+*.tgz
+
+# Specific files
+.editorconfig
+.gitignore

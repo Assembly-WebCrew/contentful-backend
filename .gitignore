@@ -59,3 +59,7 @@ typings/
 
 # IntellJ Idea
 .idea
+
+# Unencrypted secrets
+deploy/ssh_config
+deploy/deployment_key

@@ -3,11 +3,18 @@ language: node_js
 node_js:
 - '8'
 cache: yarn
+before_install:
+- openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
+  -in deploy/ssh_config.enc -out ~/.ssh/config -d
+- openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
+  -in deploy/deployment_key.enc -out ~/.ssh/id_rsa -d
 jobs:
   include:
   - stage: test
     script:
-      - npm test
+    - npm test
   - stage: deploy
     script:
-      - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
+    - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
+    - 'npm pack'
+    - 'rsync -avWe --delete-before contentful-backend-*.tgz ${TRAVIS_BRANCH}:/opt/contentful-backend/builds/'
