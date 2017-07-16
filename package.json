@@ -10,6 +10,7 @@
   "dependencies": {
     "cf-graphql": "^0.4.3",
     "contentful": "^4.5.0",
+    "cors": "^2.8.4",
     "dotenv-safe": "^4.0.4",
     "express": "^4.15.3",
     "express-graphql": "^0.6.6",

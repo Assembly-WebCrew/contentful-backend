@@ -8,6 +8,7 @@ const graphqlHTTP = require('express-graphql');
 const { getLogger, getConfig } = require('./utils');
 const logger = getLogger('server');
 const { cloneDeep } = require('lodash');
+const cors = require('cors');
 
 // Cache.
 const events = new Map();
@@ -95,6 +96,8 @@ class EventIndex {
 async function startServer({ spaceId, cdaToken, hostname, port, basePath }) {
   logger.info(`Starting server at ${hostname}:${port}`);
   const app = express();
+
+  app.use(cors());
 
   const eventIndex = new EventIndex({ spaceId, cdaToken });
 
