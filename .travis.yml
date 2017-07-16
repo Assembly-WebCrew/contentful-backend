@@ -19,5 +19,5 @@ jobs:
   - stage: deploy
     script:
     - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
-    - 'npm pack'
-    - 'rsync -avWe --delete-before contentful-backend-*.tgz ${TRAVIS_BRANCH}:/opt/contentful-backend/builds/'
+    - npm pack
+    - rsync -avWe --delete-before contentful-backend-*.tgz ${TRAVIS_BRANCH}:/opt/contentful-backend/builds/
