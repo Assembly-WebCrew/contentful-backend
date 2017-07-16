@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "test": "todo"
+    "test": "echo todo"
   },
   "dependencies": {
     "cf-graphql": "^0.4.3",
