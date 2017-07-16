@@ -63,3 +63,4 @@ typings/
 # Unencrypted secrets
 deploy/ssh_config
 deploy/deployment_key
+*.tar.gz
