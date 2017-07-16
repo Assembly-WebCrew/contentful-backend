@@ -1,0 +1,14 @@
+{
+  "name": "contentful-backend",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "todo"
+  },
+  "dependencies": {
+    "cf-graphql": "^0.4.3",
+    "express": "^4.15.3",
+    "express-graphql": "^0.6.6"
+  }
+}
