@@ -40,11 +40,14 @@ class EventIndex {
     }
 
     if (events.has(eventKey)) {
-      return cloneDeep(events.get(eventKey));
+      const eventData = cloneDeep(events.get(eventKey));
+      logger.debug(`Found event ${eventData.name}`);
+      return eventData;
     } else {
       const entries = await this.client.getEntries(options)
       const eventData = entries.items[0].fields;
       events.set(eventKey, eventData);
+      logger.debug(`Found event ${eventData.name}`);
       return eventData;
     }
   }
