@@ -19,4 +19,4 @@ jobs:
     script:
     - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
     - 'npm pack'
-    - "rsync -avP --include '*.tgz' --exclude '*' . ${TRAVIS_BRANCH}:/opt/contentful-backend/builds/"
+    - "rsync -avPe 'ssh -o StrictHostKeyChecking=no' --include '*.tgz' --exclude '*' . ${TRAVIS_BRANCH}:/opt/contentful-backend/builds/"
