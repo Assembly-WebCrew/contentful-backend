@@ -5,11 +5,10 @@ node_js:
 cache: yarn
 before_install:
 - openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
-  -in deploy/ssh_config.enc -out ssh_config -d
-- mv ssh_config ~/.ssh/config
-- openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
-  -in deploy/deployment_key.enc -out deployment_key -d
-- mv deployment_key ~/.ssh/id_rsa
+  -in secrets.tar.gz.enc -out secrets.tar.gz -d
+- tar xvf secrets.tar
+- mv deploy/ssh_config ~/.ssh/config
+- mv deploy/deployment_key ~/.ssh/id_rsa
 - chmod 0600 ~/.ssh/*
 jobs:
   include:
