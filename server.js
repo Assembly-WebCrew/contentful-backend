@@ -44,7 +44,7 @@ class EventIndex {
       logger.debug(`Found event ${eventData.name}`);
       return eventData;
     } else {
-      const entries = await this.client.getEntries(options)
+      const entries = await this.client.getEntries(options);
       const eventData = entries.items[0].fields;
       events.set(eventKey, eventData);
       logger.debug(`Found event ${eventData.name}`);
@@ -86,16 +86,6 @@ class EventIndex {
   }
 }
 
-(async () => {
-  const config = getConfig();
-
-  await startServer(config);
-
-})().catch(err => {
-  logger.fatal(err.message);
-  process.exit(1);
-});
-
 async function startServer({ spaceId, cdaToken, hostname, port, basePath }) {
   logger.info(`Starting server at ${hostname}:${port}`);
   const app = express();
@@ -131,7 +121,15 @@ async function startServer({ spaceId, cdaToken, hostname, port, basePath }) {
   });
 
   app.listen(port, hostname);
-  console.log('Running a GraphQL server!');
-  console.log(`You can access GraphiQL at http://${hostname}:${port}/event/graphiql/`);
-  console.log(`You can use the GraphQL endpoint at http://${hostname}:${port}/event/graphql/`);
+  logger.info('Contentful backend running!');
+  logger.info(`You can access GraphiQL at http://${hostname}:${port}/{event}/graphiql/`);
+  logger.info(`You can use the GraphQL endpoint at http://${hostname}:${port}/{event}/graphql/`);
 }
+
+(async () => {
+  const config = getConfig();
+  await startServer(config);
+})().catch(err => {
+  logger.fatal(err.message);
+  process.exit(1);
+});

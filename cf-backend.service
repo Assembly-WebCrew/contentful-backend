@@ -1,0 +1,23 @@
+[Unit]
+Description=Contentful Backend [Development]
+After=syslog.target network.target
+
+[Service]
+WorkingDirectory=/opt/contentful-backend/development
+ExecStart=/usr/bin/node /opt/contentful-backend/development/server.js
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=cf-backend
+User=my_user
+Group=my_user
+Environment="CONTENTFUL_HOSTNAME=localhost"
+Environment="CONTENTFUL_PORT=4000"
+Environment="BASE_PATH=/api/"
+Environment="CONTENTFUL_SPACE_ID=my_space_id"
+Environment="CONTENTFUL_CONTENT_TOKEN=my_token"
+Environment="CONTENTFUL_MANAGEMENT_TOKEN=my_mgmt_token"
+Environment="NODE_ENV=production"
+
+[Install]
+WantedBy=multi-user.target
