@@ -28,7 +28,8 @@ class EventIndex {
   }
 
   async getEvent(name) {
-    const eventKey = this.getEventKey(name), options = {
+    const eventKey = this.getEventKey(name);
+    const options = {
       content_type: 'event',
       limit: 1
     };
@@ -46,25 +47,26 @@ class EventIndex {
     } else {
       const entries = await this.client.getEntries(options);
       const eventData = entries.items[0].fields;
-      events.set(eventKey, eventData);
+      events.set(eventKey, cloneDeep(eventData));
       logger.debug(`Found event ${eventData.name}`);
       return eventData;
     }
   }
 
   async getEventApi(name) {
-    const eventKey = this.getEventKey(name),
-      { secrets } = await this.getEvent(name),
-      { spaceId, cdaToken, cmaToken } = secrets;
+    const eventKey = this.getEventKey(name);
 
     if (middleware.has(eventKey)) {
       return middleware.get(eventKey);
     }
 
+    const { secrets } = await this.getEvent(name);
+    const { spaceId, cdaToken, cmaToken } = secrets;
+
     logger.info(`Fetching content types for space (${spaceId}) to create a space graph`);
-    logger.trace(`Configuration: ${JSON.stringify({spaceId, cdaToken, cmaToken})}`);
+    logger.trace(`Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`);
     logger.debug(`Initializing contentful client for space ${spaceId}`);
-    const client = cfGraphql.createClient({spaceId, cdaToken, cmaToken});
+    const client = cfGraphql.createClient({ spaceId, cdaToken, cmaToken });
 
     logger.debug('Fetching content types');
     const contentTypes = await client.getContentTypes();
@@ -79,10 +81,10 @@ class EventIndex {
 
     const opts = { version: true, timeline: true, detailedErrors: false };
     const extension = cfGraphql.helpers.expressGraphqlExtension(client, schema, opts);
-    const mw = graphqlHTTP(extension);
-    middleware.set(eventKey, mw);
+    const apiMiddleware = graphqlHTTP(extension);
+    middleware.set(eventKey, apiMiddleware);
 
-    return mw;
+    return apiMiddleware;
   }
 }
 
