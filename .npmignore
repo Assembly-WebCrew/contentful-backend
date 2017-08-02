@@ -5,6 +5,10 @@ deploy/
 # File types
 *.yml
 *.tgz
+*.enc
+*.service
+*.tar.gz
+*.sh
 
 # Specific files
 .editorconfig
