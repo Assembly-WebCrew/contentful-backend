@@ -20,4 +20,5 @@ jobs:
   - stage: deploy
     script:
     - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
+    - 'chmod +x ./deploy.sh'
     - './deploy.sh'
