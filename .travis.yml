@@ -20,5 +20,8 @@ jobs:
   - stage: deploy
     script:
     - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
-    - 'chmod +x ./deploy.sh'
-    - './deploy.sh'
+    - chmod +x ./deploy.sh
+    - "./deploy.sh"
+notifications:
+  slack:
+    secure: aKbtycdzn2J+PeatYEVhrArEw5q46s9LGUbVmp2iZ01ixY+vpZ/uKGoWs7i877MD+9E1Wdmy9P1RjX0Z/Jxw3Gow1zMnZwNargupEhEaYXYvieurxZ9goGYK2qRrrCNPsMoVCKRhSiZnfWWYzB4WsO7kxJk2+DAMsxdvxK+VEUhY2r+iY67EqMS2kb1Ybp6pg/OQk6rr7UARHxMkrwfibBylhvrBU4hv7goiGmgOY7+sVD5M7L0auIp065KQQh594aD/e3vKz9VueYwdScUoL1i4cu0IVlmT+fD+B+Eqd+BzIcS5m+VcDEdCKVukCyGhHQSTdxMqFRejLyAr+mrR8MwTzGmJdTidjuw3SG/FGpeFbbkxMSrcr2ggX4ugKq0lFcDkNl6EOBYyQS35tIEbQ5m8Jf9NLh4MBIbzdiNtuwelJ8ZI13s+Ao5kl9CEt+hM1OF3jWnQohkFyLfFM9j1Za0RqgGI+nMVS3LYRv/LgA+NA8HcNqM6CrikvBWb85JP1zMV7qGZD23U1tIiW5l6mTSnr8ItSfCie2HBrYLEj49U9pBXxEVrE7BqdJhty4kl619bn+dPVYG+5RITR4f38VI//VuESNFfgcQHs75VFOL5lSIxcvFKGnl5cCGvISHf4JtHIG0T7entBob9OravJsqWgyi/pUyDyqdRj1iper0=
