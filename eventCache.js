@@ -65,12 +65,13 @@ class EventCache {
     return data;
   }
 
-  async getApi(eventName) {
+  // TODO: Remove locale specific middleware once https://github.com/contentful-labs/cf-graphql/issues/29 has been resolved.
+  async getApi(eventName, locale) {
     const key = this._getEventKey(eventName);
 
-    if (this._getEventCache(key).has(key)) {
+    if (this._getEventCache(key).has(`${locale}_middleware`)) {
       logger.debug(`Returning cached middleware for ${key}`);
-      return this._getEventCache(key).get(key);
+      return this._getEventCache(key).get(`${locale}_middleware`);
     }
 
     logger.info(`Creating GraphQL middleware for ${key}`);
@@ -81,7 +82,7 @@ class EventCache {
     logger.debug(`Fetching content types for space (${spaceId}) to create a space graph`);
     logger.debug(`Initializing contentful client for space ${spaceId}`);
     logger.trace(`Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`);
-    const client = cfGraphql.createClient({ spaceId, cdaToken, cmaToken });
+    const client = cfGraphql.createClient({ spaceId, cdaToken, cmaToken, locale });
 
     logger.debug('Fetching content types');
     const contentTypes = await client.getContentTypes();
@@ -96,16 +97,12 @@ class EventCache {
     const introspection = (await graphql(schema, introspectionQuery)).data;
     this._getEventCache(key).set('schema', introspection);
 
-    const middleware = graphqlHTTP(cfGraphql.helpers.expressGraphqlExtension(
-      client,
-      schema,
-      {
-        version: true,
-        timeline: true,
-        detailedErrors: false
-      }
-    ));
-    this._getEventCache(key).set('middleware', middleware);
+    const middleware = graphqlHTTP(cfGraphql.helpers.expressGraphqlExtension(client, schema, {
+      version: true,
+      timeline: true,
+      detailedErrors: false
+    }));
+    this._getEventCache(key).set(`${locale}_middleware`, middleware);
 
     return middleware;
   }

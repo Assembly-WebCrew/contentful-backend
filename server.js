@@ -37,16 +37,18 @@ async function startServer({ space, accessToken, hostname, port, basePath }) {
       .catch(next);
   });
 
-  app.get('/:event/graphiql', (req, res) => {
+  app.get('/:locale/:event/graphiql', (req, res) => {
     const ui = cfGraphql.helpers.graphiql({
       title: 'Assembly GraphQL Content',
-      url: `${basePath}${req.params.event}/graphql`
+      // TODO: Remove locale specific middleware once https://github.com/contentful-labs/cf-graphql/issues/29 has been resolved.
+      url: `${basePath}${req.params.locale}/${req.params.event}/graphql`
     });
     res.set(ui.headers).status(ui.statusCode).end(ui.body)
   });
 
-  app.use('/:event/graphql', (req, res, next) => {
-    events.getApi(req.params.event)
+  app.use('/:locale/:event/graphql', (req, res, next) => {
+    // TODO: Remove locale specific middleware once https://github.com/contentful-labs/cf-graphql/issues/29 has been resolved.
+    events.getApi(req.params.event, req.params.locale)
       .then(middleware => middleware(req, res, next))
       .catch(next);
   });
