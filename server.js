@@ -9,11 +9,22 @@ const { getLogger, getConfig } = require('./utils');
 const logger = getLogger('server');
 const { cloneDeep } = require('lodash');
 const cors = require('cors');
+const { graphql } = require('graphql');
 
 // Cache.
-const events = new Map();
-const middleware = new Map();
+const eventCache = new Map();
 const defaultEvent = Symbol('default event');
+const introspectionQuery = `{
+  __schema {
+    types {
+      kind
+      name
+      possibleTypes {
+        name
+      }
+    }
+  }
+}`;
 
 class EventIndex {
   constructor({ spaceId, cdaToken }) {
@@ -40,14 +51,14 @@ class EventIndex {
       options['fields.isDefault'] = true;
     }
 
-    if (events.has(eventKey)) {
-      const eventData = cloneDeep(events.get(eventKey));
+    if (eventCache.has(eventKey)) {
+      const eventData = cloneDeep(eventCache.get(eventKey).get('eventData'));
       logger.debug(`Found event ${eventData.name}`);
       return eventData;
     } else {
       const entries = await this.client.getEntries(options);
       const eventData = entries.items[0].fields;
-      events.set(eventKey, cloneDeep(eventData));
+      eventCache.set(eventKey, new Map([['eventData', cloneDeep(eventData)]]));
       logger.debug(`Found event ${eventData.name}`);
       return eventData;
     }
@@ -56,16 +67,21 @@ class EventIndex {
   async getEventApi(name) {
     const eventKey = this.getEventKey(name);
 
-    if (middleware.has(eventKey)) {
-      return middleware.get(eventKey);
+    if (!eventCache.has(eventKey)) {
+      await this.getEvent(eventKey);
     }
 
-    const { secrets } = await this.getEvent(name);
-    const { spaceId, cdaToken, cmaToken } = secrets;
+    const eventApi = eventCache.get(eventKey);
+
+    if (eventApi.has('middleware')) {
+      return eventApi.get('middleware');
+    }
+
+    const { spaceId, cdaToken, cmaToken } = (await this.getEvent(name)).secrets;
 
     logger.info(`Fetching content types for space (${spaceId}) to create a space graph`);
-    logger.trace(`Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`);
     logger.debug(`Initializing contentful client for space ${spaceId}`);
+    logger.trace(`Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`);
     const client = cfGraphql.createClient({ spaceId, cdaToken, cmaToken });
 
     logger.debug('Fetching content types');
@@ -78,13 +94,21 @@ class EventIndex {
 
     logger.info('Creating GraphQL schema');
     const schema = await cfGraphql.createSchema(spaceGraph);
-
+    const schemaIntrospection = (await graphql(schema, introspectionQuery)).data;
+    eventApi.set('schema', schemaIntrospection);
     const opts = { version: true, timeline: true, detailedErrors: false };
     const extension = cfGraphql.helpers.expressGraphqlExtension(client, schema, opts);
     const apiMiddleware = graphqlHTTP(extension);
-    middleware.set(eventKey, apiMiddleware);
+    eventApi.set('middleware', apiMiddleware);
 
     return apiMiddleware;
+  }
+
+  async getEventSchema(eventKey) {
+    if (!eventCache.has(eventKey)) {
+      await this.getEventApi(eventKey);
+    }
+    return eventCache.get(eventKey).get('schema');
   }
 }
 
@@ -104,6 +128,14 @@ async function startServer({ spaceId, cdaToken, hostname, port, basePath }) {
         // Hide secrets.
         delete event.secrets;
         res.send(event);
+      })
+      .catch(next);
+  });
+
+  app.get('/:event/schema', (req, res, next) => {
+    eventIndex.getEventSchema(req.params.event)
+      .then(schema => {
+        return res.send(schema)
       })
       .catch(next);
   });
