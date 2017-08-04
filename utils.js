@@ -1,20 +1,13 @@
-function getEnvValue(key, defaultValue, required) {
-    const value = process.env[key];
-    if (!value && required) {
-        throw new Error(`Missing required configuration value: "${key}"`);
-    }
-
-    return value || defaultValue;
-}
+const getEnvValue = (key, defaultValue) => process.env[key] || defaultValue;
 
 module.exports = {
     getConfig: () => ({
         hostname: getEnvValue('CONTENTFUL_HOSTNAME', 'localhost'),
         port: getEnvValue('CONTENTFUL_PORT', 4000),
-        basePath: getEnvValue('BASE_PATH', '/'),
-        spaceId: getEnvValue('CONTENTFUL_SPACE_ID', undefined, true),
-        cdaToken: getEnvValue('CONTENTFUL_CONTENT_TOKEN', undefined, true),
-        cmaToken: getEnvValue('CONTENTFUL_MANAGEMENT_TOKEN', undefined, true)
+        basePath: getEnvValue('CONTENTFUL_BASE_PATH', '/'),
+        space: getEnvValue('CONTENTFUL_SPACE_ID', undefined),
+        accessToken: getEnvValue('CONTENTFUL_CONTENT_TOKEN', undefined),
+        managementToken: getEnvValue('CONTENTFUL_MANAGEMENT_TOKEN', undefined)
     }),
     getLogger: name => ({
         trace: message => {},
