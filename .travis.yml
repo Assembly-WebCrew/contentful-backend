@@ -1,27 +1,27 @@
 dist: trusty
 language: node_js
 node_js:
-- '8'
+  - "8"
 cache: yarn
 addons:
   ssh_known_hosts: moukari.assembly.org
 before_install:
-- openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
-  -in secrets.tar.gz.enc -out secrets.tar.gz -d
-- tar zxvf secrets.tar.gz
-- mv deploy/ssh_config ~/.ssh/config
-- mv deploy/deployment_key ~/.ssh/id_rsa
-- chmod 0600 ~/.ssh/*
+  - openssl aes-256-cbc -K $encrypted_a4f06b6584ec_key -iv $encrypted_a4f06b6584ec_iv
+    -in secrets.tar.gz.enc -out secrets.tar.gz -d
+  - tar zxvf secrets.tar.gz
+  - mv deploy/ssh_config ~/.ssh/config
+  - mv deploy/deployment_key ~/.ssh/id_rsa
+  - chmod 0600 ~/.ssh/*
 jobs:
   include:
-  - stage: test
-    script:
-    - npm test
-  - stage: deploy
-    script:
-    - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
-    - chmod +x ./deploy.sh
-    - "./deploy.sh"
+    - stage: test
+      script:
+        - npm test
+    - stage: deploy
+      script:
+        - '[ "$TRAVIS_BRANCH" != "master" ] && travis_terminate 0 || :'
+        - chmod +x ./deploy.sh
+        - "./deploy.sh"
 notifications:
   slack:
-    secure: aKbtycdzn2J+PeatYEVhrArEw5q46s9LGUbVmp2iZ01ixY+vpZ/uKGoWs7i877MD+9E1Wdmy9P1RjX0Z/Jxw3Gow1zMnZwNargupEhEaYXYvieurxZ9goGYK2qRrrCNPsMoVCKRhSiZnfWWYzB4WsO7kxJk2+DAMsxdvxK+VEUhY2r+iY67EqMS2kb1Ybp6pg/OQk6rr7UARHxMkrwfibBylhvrBU4hv7goiGmgOY7+sVD5M7L0auIp065KQQh594aD/e3vKz9VueYwdScUoL1i4cu0IVlmT+fD+B+Eqd+BzIcS5m+VcDEdCKVukCyGhHQSTdxMqFRejLyAr+mrR8MwTzGmJdTidjuw3SG/FGpeFbbkxMSrcr2ggX4ugKq0lFcDkNl6EOBYyQS35tIEbQ5m8Jf9NLh4MBIbzdiNtuwelJ8ZI13s+Ao5kl9CEt+hM1OF3jWnQohkFyLfFM9j1Za0RqgGI+nMVS3LYRv/LgA+NA8HcNqM6CrikvBWb85JP1zMV7qGZD23U1tIiW5l6mTSnr8ItSfCie2HBrYLEj49U9pBXxEVrE7BqdJhty4kl619bn+dPVYG+5RITR4f38VI//VuESNFfgcQHs75VFOL5lSIxcvFKGnl5cCGvISHf4JtHIG0T7entBob9OravJsqWgyi/pUyDyqdRj1iper0=
+    secure: GmaJWbbIbvQxHV+jSK1V1HGWtEy15MGD7UajsDm5YYxHFH0gqbGEBV6t5TahL/S0feZfMrQwqI+ZpWMOB+pVY404+gLfczredFp4nRuGaum3+BNWQjMVdKqh2Kv851Y8yUsZqg9jeY/C4Sv/gEzzdfek76dnV5/Yl185zEZPC0/dCzekVa60u6i1fBut2ll+I1aQjyY3HlEj6krjaEYx7ptY+xrJWqyf9SkStDvxYEWKX3biGFbhofNLeumimNRN4oGZVOVFCPaLH4Pl7DGvkHlEK05BKJZe+b2YWI+efSPFUt15gcImpf/MDpc+lkYtXuM1nuIRjAU6S4HgQLK2wRv2HXxaAbA0Ar24LzOkKzqJRA/ciyRwKJUUfsN36LH3I0DS+ZJzV5q5PJptrrBge0g1WLzLdUa9YkySTIxFtmOhMNRt5DpAoHXXm98UQPo7gP9tNenYxWurRntjHYOzFmtIKpxB//kPIOFQRoEHjgMM1J1/HxVwQ9LeuYEP37jHroWp/++aCKZJdDN5Ua4WqXnavBlXmSuaWyaTIn8jAZIz4tk0y1PWsgOt/2VC1/TJC4o53HNal5t/kVaQvIzC2FiYNVtN9M4MNhxeEST/VeaG7MgiD3VLNVTPAL79HdxcwFF+7HHLHLHKKoMwZpoJMXCH8iduyjlYnKDzBORtdEc=
