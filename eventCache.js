@@ -1,14 +1,14 @@
-const { getLogger } = require('./utils');
-const logger = getLogger('eventCache');
+const { getLogger } = require("./utils");
+const logger = getLogger("eventCache");
 
-const { cloneDeep } = require('lodash');
+const { cloneDeep } = require("lodash");
 
-const contentful = require('contentful');
-const { graphql } = require('graphql');
-const cfGraphql = require('cf-graphql');
-const graphqlHTTP = require('express-graphql');
+const contentful = require("contentful");
+const { graphql } = require("graphql");
+const cfGraphql = require("cf-graphql");
+const graphqlHTTP = require("express-graphql");
 
-const LifetimeCache = require('./lifetimeCache');
+const LifetimeCache = require("./lifetimeCache");
 
 const introspectionQuery = `{
   __schema {
@@ -25,7 +25,7 @@ const introspectionQuery = `{
 class EventCache {
   constructor({ space, accessToken }) {
     this.client = contentful.createClient({ space, accessToken });
-    this.defaultEvent = Symbol('default event');
+    this.defaultEvent = Symbol("default event");
     this.cache = new LifetimeCache(120000);
   }
 
@@ -44,25 +44,39 @@ class EventCache {
 
   async getEvent(eventName) {
     const key = this._getEventKey(eventName);
-    const options = { content_type: 'event', limit: 1 };
+    const options = { content_type: "event", limit: 1 };
 
     if (eventName) {
-      options['fields.name'] = eventName;
+      options["fields.name"] = eventName;
     } else {
-      options['fields.isDefault'] = true;
+      options["fields.isDefault"] = true;
     }
 
-    if (this._getEventCache(key).has('data')) {
-      const data = cloneDeep(this._getEventCache(key).get('data'));
+    if (this._getEventCache(key).has("data")) {
+      const data = cloneDeep(this._getEventCache(key).get("data"));
       logger.debug(`Found cached event ${data.name}`);
       return data;
     }
 
     const entries = await this.client.getEntries(options);
     const data = entries.items[0].fields;
-    this._getEventCache(key).set('data', cloneDeep(data));
+    this._getEventCache(key).set("data", cloneDeep(data));
     logger.debug(`Fetched event ${data.name}`);
     return data;
+  }
+
+  async getLandingPageEvents() {
+    const options = { content_type: "event", "fields.showOnLandingPage": true };
+
+    const entries = await this.client.getEntries(options);
+    const events = [];
+    entries.items.forEach(item => {
+      const data = item.fields;
+      this._getEventCache(data.name).set("data", cloneDeep(data));
+      logger.debug(`Fetched landing page event ${data.name}`);
+      events.push(data);
+    });
+    return events;
   }
 
   // TODO: Remove locale specific middleware once https://github.com/contentful-labs/cf-graphql/issues/29 has been resolved.
@@ -79,29 +93,40 @@ class EventCache {
     const eventData = await this.getEvent(key);
     const { spaceId, cdaToken, cmaToken } = eventData.secrets;
 
-    logger.debug(`Fetching content types for space (${spaceId}) to create a space graph`);
+    logger.debug(
+      `Fetching content types for space (${spaceId}) to create a space graph`
+    );
     logger.debug(`Initializing contentful client for space ${spaceId}`);
-    logger.trace(`Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`);
-    const client = cfGraphql.createClient({ spaceId, cdaToken, cmaToken, locale });
+    logger.trace(
+      `Configuration: ${JSON.stringify({ spaceId, cdaToken, cmaToken })}`
+    );
+    const client = cfGraphql.createClient({
+      spaceId,
+      cdaToken,
+      cmaToken,
+      locale
+    });
 
-    logger.debug('Fetching content types');
+    logger.debug("Fetching content types");
     const contentTypes = await client.getContentTypes();
-    logger.debug('Creating space graph');
+    logger.debug("Creating space graph");
     const spaceGraph = await cfGraphql.prepareSpaceGraph(contentTypes);
 
-    const names = spaceGraph.map(ct => ct.names.type).join(', ');
+    const names = spaceGraph.map(ct => ct.names.type).join(", ");
     logger.debug(`Contentful content types prepared: ${names}`);
 
-    logger.debug('Creating GraphQL schema');
+    logger.debug("Creating GraphQL schema");
     const schema = await cfGraphql.createSchema(spaceGraph);
     const introspection = (await graphql(schema, introspectionQuery)).data;
-    this._getEventCache(key).set('schema', introspection);
+    this._getEventCache(key).set("schema", introspection);
 
-    const middleware = graphqlHTTP(cfGraphql.helpers.expressGraphqlExtension(client, schema, {
-      version: true,
-      timeline: true,
-      detailedErrors: false
-    }));
+    const middleware = graphqlHTTP(
+      cfGraphql.helpers.expressGraphqlExtension(client, schema, {
+        version: true,
+        timeline: true,
+        detailedErrors: false
+      })
+    );
     this._getEventCache(key).set(`${locale}_middleware`, middleware);
 
     return middleware;
@@ -109,10 +134,10 @@ class EventCache {
 
   async getSchema(eventName) {
     const key = this._getEventKey(eventName);
-    if (!this._getEventCache(key).has('schema')) {
+    if (!this._getEventCache(key).has("schema")) {
       await this.getApi(key);
     }
-    return this._getEventCache(key).get('schema');
+    return this._getEventCache(key).get("schema");
   }
 }
 
