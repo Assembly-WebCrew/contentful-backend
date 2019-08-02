@@ -8,8 +8,8 @@
     "start:w": "nodemon -w server.js -w utils.js server.js"
   },
   "dependencies": {
-    "cf-graphql": "^0.4.3",
-    "contentful": "^4.5.0",
+    "cf-graphql": "^0.5.0",
+    "contentful": "^5.0.5",
     "cors": "^2.8.4",
     "dotenv-safe": "^4.0.4",
     "express": "^4.15.3",
